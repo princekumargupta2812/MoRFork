@@ -185,9 +185,10 @@ bash scripts/pretrain_eval_fewshot.sh {launcher} {wandb_mode} {gpu_indices} {exp
 # Example: bash scripts/pretrain_eval_fewshot.sh deepspeed online 0,1,2,3 250720_pretrain_smollm-360m_rec3_middle_cycle_random_lr3e-3_mor_expert_linear_alpha_0.1_sigmoid_aux_loss_0.001
 ```
 
-## Pretrained Checkpoints
 
-We provide pretrained checkpoints for our 360M parameter Vanilla, Recursive, and MoR models via [Google Drive](https://drive.google.com/drive/folders/1pYKJOu2aBGC-jgoWbfP6T_vqEYtUVxa4?usp=drive_link). 
+## ✅ Pretrained Checkpoints
+
+We share pretrained checkpoints for our 360M parameter Vanilla, Recursive, and MoR models in [Google Drive](https://drive.google.com/drive/folders/1pYKJOu2aBGC-jgoWbfP6T_vqEYtUVxa4?usp=drive_link). Move checkpoints under `./checkpoints` folder.
 
 Alternatively, you can use the following commands to download them, but please be aware of a potential bug:
 
