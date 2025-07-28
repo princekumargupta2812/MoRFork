@@ -192,3 +192,13 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+checkpoints/
+results/
+hf_cache/
+hf_datasets/
+hf_models/
+*.png
+*.pdf
+*.html
+*.csv

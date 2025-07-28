@@ -93,7 +93,7 @@ stop_steps: 14161
 num_warmup_steps: 86
 save_interval: 0.1
 save_steps: null
-fixed_save_steps: '1373,3433,11328'
+fixed_save_steps: null
 save_total_limit: null
 logging_steps: 100
 dataloader_num_workers: 0

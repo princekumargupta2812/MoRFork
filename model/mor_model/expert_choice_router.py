@@ -8,12 +8,15 @@ import torch.nn.functional as F
 from transformers.processing_utils import Unpack
 from transformers.modeling_flash_attention_utils import FlashAttentionKwargs
 from transformers.modeling_utils import ALL_ATTENTION_FUNCTIONS
+from transformers.utils import logging
 
 from model.kv_caches.cache_utils import Cache, StaticCache, DynamicCache
 from model.mor_model.util import ROUTER_TYPES, MoRLayerOutputWithPast
 from model.base_model.modeling_llama import apply_rotary_pos_emb, eager_attention_forward, LlamaAttention
 from util.misc import get_torch_dtype
-    
+
+logger = logging.get_logger(__name__)
+
 
 class MoRLlamaAttention(LlamaAttention):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
@@ -40,6 +43,8 @@ class MoRLlamaAttention(LlamaAttention):
         if past_key_value is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
             cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
+            # This class is for hybrid KV sharing that leverages shared caches 
+            # for inactive positions while updating active ones through actual computation
             if "selected_tokens" in kwargs:
                 cache_kwargs["selected_tokens"] = kwargs["selected_tokens"]
             key_states, value_states = past_key_value.update(key_states, value_states, self.layer_idx, cache_kwargs)
@@ -47,11 +52,10 @@ class MoRLlamaAttention(LlamaAttention):
         attention_interface: Callable = eager_attention_forward
         if self.config._attn_implementation != "eager":
             if self.config._attn_implementation == "sdpa" and kwargs.get("output_attentions", False):
-                pass
-                # logger.warning_once(
-                #     "`torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True`. Falling back to "
-                #     'eager attention. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.'
-                # )
+                logger.warning_once(
+                    "`torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True`. Falling back to "
+                    'eager attention. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.'
+                )
             else:
                 attention_interface = ALL_ATTENTION_FUNCTIONS[self.config._attn_implementation]
 
@@ -87,9 +91,10 @@ class MoRLlamaDecoderLayer(nn.Module):
         self.capacity_factor = capacity_factor
         self.cap_warmup_step = cap_warmup_step  # warm_up step for capacity_factor
         
+        torch_dtype = get_torch_dtype(cfg)
         for blk in self.block:
-            blk.self_attn = MoRLlamaAttention(config, blk.self_attn.layer_idx)
-        
+            blk.self_attn = MoRLlamaAttention(config, blk.self_attn.layer_idx).to(torch_dtype)
+
         self.training_step = 0
         
         self.router_func = cfg.mor.expert.router_func
@@ -217,7 +222,6 @@ class MoRLlamaDecoderLayer(nn.Module):
         if prev_selected_tokens is not None:
             selected_tokens = torch.gather(prev_selected_tokens, dim=1, index=selected_tokens)
             indices_expanded = selected_tokens.expand(-1, -1, hidden_dim)
-
 
         if "kv_sharing" in self.cfg and self.cfg.kv_sharing.enable and "update_cache" in self.cfg.kv_sharing and self.cfg.kv_sharing.update_cache:
             kwargs["selected_tokens"] = selected_tokens

@@ -49,7 +49,7 @@ To get started, follow these steps to set up your development environment. We re
 2.  **Install Required Packages:**
     First, ensure your `pip` and `setuptools` are up to date. Then, install `torch` and the dependencies listed in [requirements.txt](https://github.com/raymin0223/mixture_of_recursions/tree/main/requirements.txt).
 
-    **Note:** We specifically used `torch==2.6.0+cu124`, `flash_attn==2.7.4.post1`, and `transformers==4.50.0`. If you encounter issues, consider these exact versions.
+    **Note:** We specifically used `torch==2.6.0+cu124`, `flash_attn==2.7.4.post1`, and `transformers==4.52.4`. If you encounter issues, consider these exact versions.
 
     ```bash
     pip install --upgrade pip
@@ -71,17 +71,17 @@ Follow these steps to download and prepare the dataset:
     Create the necessary directories (`hf_cache`, `hf_datasets`, `hf_models`, and `results`) under your designated data path. Replace `{your_data_path}` with your actual path.
 
     ```bash
-    mkdir -p {your_data_path}/mixture-of-recursions/hf_cache
-    mkdir -p {your_data_path}/mixture-of-recursions/hf_datasets
-    mkdir -p {your_data_path}/mixture-of-recursions/hf_models
-    mkdir -p {your_data_path}/mixture-of-recursions/results
+    mkdir -p {your_data_path}/mixture_of_recursions/hf_cache
+    mkdir -p {your_data_path}/mixture_of_recursions/hf_datasets
+    mkdir -p {your_data_path}/mixture_of_recursions/hf_models
+    mkdir -p {your_data_path}/mixture_of_recursions/results
     ```
 
 2.  **Create Symbolic Links:**
     Establish symbolic links from your data path to your project's current path. Replace `{your_data_path}` and `{your_project_path}` accordingly.
 
     ```bash
-    ln -s {your_data_path}/mixture-of-recursions/* {your_project_path}/mixture-of-recursions/
+    ln -s {your_data_path}/mixture_of_recursions/* {your_project_path}/mixture_of_recursions/
     ```
 
 3.  **Download Pretraining Corpus:**
@@ -90,6 +90,9 @@ Follow these steps to download and prepare the dataset:
     ```bash
     bash lm_dataset/download_scripts/download_fineweb-edu-dedup.sh
     ```
+
+4.  **Move Cached Dataset:**
+    Move the cached dataset to the `DATA_DIR` as specified in [lm_dataset/load_dataset.py](https://github.com/raymin0223/mixture_of_recursions/blob/884fa5a0b4fb4c886f55bd7f62d8a2750cdb4773/lm_dataset/load_dataset.py#L16-L27). This ensures the dataset is located in the correct directory for loading. You can do steps 3 and 4 together by downloading the dataset using the script at [download_langauge_modeling_datasets.sh](https://github.com/raymin0223/mixture_of_recursions/blob/main/lm_dataset/download_scripts/download_langauge_modeling_datasets.sh).
 
 
 ## 🔎 Implementation Overview
@@ -181,6 +184,21 @@ To run training and few-shot evaluation concurrently with a single command, exec
 bash scripts/pretrain_eval_fewshot.sh {launcher} {wandb_mode} {gpu_indices} {exp1_config} {exp2_config} ...
 # Example: bash scripts/pretrain_eval_fewshot.sh deepspeed online 0,1,2,3 250720_pretrain_smollm-360m_rec3_middle_cycle_random_lr3e-3_mor_expert_linear_alpha_0.1_sigmoid_aux_loss_0.001
 ```
+
+## Pretrained Checkpoints
+
+We provide pretrained checkpoints for our 360M parameter Vanilla, Recursive, and MoR models via [Google Drive](https://drive.google.com/drive/folders/1pYKJOu2aBGC-jgoWbfP6T_vqEYtUVxa4?usp=drive_link). 
+
+Alternatively, you can use the following commands to download them, but please be aware of a potential bug:
+
+```bash
+pip install gdown
+
+mkdir -p checkpoints
+gdown --folder 'https://drive.google.com/drive/folders/1pYKJOu2aBGC-jgoWbfP6T_vqEYtUVxa4?usp=sharing' -O checkpoints
+```
+
+Additionally, you can find a script to explore the routing behavior of the expert-choice MoR model in the `notebooks/250727_get_mor_routing_decision.ipynb` notebook.
 
 
 ## 🙏 BibTeX
