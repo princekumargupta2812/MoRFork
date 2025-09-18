@@ -1,4 +1,4 @@
-# Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation
+# Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation (NeurIPS 2025)
 
 <a href="https://arxiv.org/abs/2507.10524"><img src="https://img.shields.io/badge/Paper-arXiv:2507.10524-Green"></a>
 <a href="https://github.com/raymin0223/mixture_of_recursions?tab=readme-ov-file#-bibtex"><img src="https://img.shields.io/badge/Paper-BibTex-yellow"></a>
