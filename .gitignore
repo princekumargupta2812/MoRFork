@@ -193,6 +193,7 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+eval_outputs/
 checkpoints/
 results/
 hf_cache/
